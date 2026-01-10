@@ -1,5 +1,43 @@
 @import "tailwindcss";
 
+@theme {
+  --color-metal: #3b82f6;
+  --color-metal-light: #60a5fa;
+  --color-metal-lighter: #dbeafe;
+  --color-metal-dark: #1e3a8a;
+  --color-metal-darker: #1e40af;
+
+  --color-ceramics: #f59e0b;
+  --color-ceramics-light: #fbbf24;
+  --color-ceramics-lighter: #fef3c7;
+  --color-ceramics-dark: #78350f;
+  --color-ceramics-darker: #92400e;
+
+  --color-resin: #10b981;
+  --color-resin-light: #34d399;
+  --color-resin-lighter: #d1fae5;
+  --color-resin-dark: #064e3b;
+  --color-resin-darker: #065f46;
+
+  --color-chemicals: #a855f7;
+  --color-chemicals-light: #c084fc;
+  --color-chemicals-lighter: #f3e8ff;
+  --color-chemicals-dark: #581c87;
+  --color-chemicals-darker: #6b21a8;
+
+  --color-alloys: #f43f5e;
+  --color-alloys-light: #fb7185;
+  --color-alloys-lighter: #ffe4e6;
+  --color-alloys-dark: #881337;
+  --color-alloys-darker: #9f1239;
+
+  --color-accent-primary: #06b6d4;
+  --color-accent-secondary: #facc15;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+}
+
 @layer components {
   .bridges-container {
     @apply min-h-screen bg-slate-900 text-gray-100 p-4 md:p-8 font-mono relative;

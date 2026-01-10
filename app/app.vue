@@ -147,6 +147,9 @@ const totalRequisitionList = computed(() => {
       <!-- Requisition List -->
       <RequisitionList v-if="items.length > 0" :requisition-list="totalRequisitionList" />
 
+      <section class="mx-auto bridges-status text-cyan-400 text-center">
+        /// Keep on Keeping on ///
+      </section>
     </div>
   </div>
 </template>

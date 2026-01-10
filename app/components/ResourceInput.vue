@@ -5,13 +5,13 @@
         </h3>
         <div class="space-y-3">
             <div class="resource-stat-row">
-                <label class="resource-stat-label">Cur</label>
-                <input :value="modelValue.current" @input="updateValue('current', $event.target.value)" type="number"
+                <label class="resource-stat-label">Current</label>
+                <input :value="modelValue.current" @input="updateValue('current', $event.target.value)" type="text"
                     min="0" :class="`resource-stat-input focus:border-${color}-500 text-gray-300`" />
             </div>
             <div class="resource-stat-row">
-                <label class="resource-stat-label">Tgt</label>
-                <input :value="modelValue.target" @input="updateValue('target', $event.target.value)" type="number"
+                <label class="resource-stat-label">Target</label>
+                <input :value="modelValue.target" @input="updateValue('target', $event.target.value)" type="text"
                     min="0" :class="`resource-stat-input focus:border-${color}-500 text-${color}-100`" />
             </div>
         </div>
