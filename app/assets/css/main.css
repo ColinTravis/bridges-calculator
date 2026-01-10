@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 @theme {
+  --font-mono: "Bridges Neon", monospace;
+  --font-sans: "Bridges Medium", sans-serif;
+  --font-light: "Bridges Light", sans-serif;
+
   --color-metal: #3b82f6;
   --color-metal-light: #60a5fa;
   --color-metal-lighter: #dbeafe;
@@ -38,6 +42,25 @@
   --color-error: #ef4444;
 }
 
+@font-face {
+  font-family: "Bridges Neon";
+  src: url("../fonts/EX_PS_Medium_Neon.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Bridges Light";
+  src: url("../fonts/BO_CD_Mono_Light.otf") format("opentype");
+  font-weight: light;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Bridges Medium";
+  src: url("../fonts/BO_CD_Mono_Medium.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 @layer components {
   .bridges-container {
     @apply min-h-screen bg-slate-900 text-gray-100 p-4 md:p-8 font-mono relative;
@@ -64,7 +87,7 @@
   }
 
   .bridges-title {
-    @apply text-3xl md:text-5xl font-extrabold tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-b from-gray-100 to-gray-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)];
+    @apply text-3xl md:text-5xl font-extrabold tracking-wider uppercase text-transparent bg-clip-text py-4 text-white;
   }
 
   .bridges-status {
