@@ -1,22 +1,24 @@
 <script setup>
+const { solve } = useOptimizer()
 
-const {
-  metalIncrements,
-  ceramicsIncrements,
-  resinIncrements,
-  chemicalsIncrements,
-  alloysIncrements,
-  solve
-} = useOptimizer()
+const resourceTypes = {
+  metal: { increments: [1000, 800, 600, 400, 200, 100, 50], color: 'blue' },
+  ceramics: { increments: [800, 640, 480, 320, 160, 80, 40], color: 'amber' },
+  resin: { increments: [800, 640, 480, 320, 160, 80, 40], color: 'emerald' },
+  chemicals: { increments: [600, 480, 360, 240, 120, 60, 30], color: 'purple' },
+  alloys: { increments: [1200, 960, 720, 480, 240, 120, 60], color: 'rose' }
+}
 
 // State
 const items = ref([])
 const newItemName = ref('')
-const newItemMetal = ref({ current: 0, target: 0 })
-const newItemCeramics = ref({ current: 0, target: 0 })
-const newItemResin = ref({ current: 0, target: 0 })
-const newItemChemicals = ref({ current: 0, target: 0 })
-const newItemAlloys = ref({ current: 0, target: 0 })
+const newItem = ref({
+  metal: { current: 0, target: 0 },
+  ceramics: { current: 0, target: 0 },
+  resin: { current: 0, target: 0 },
+  chemicals: { current: 0, target: 0 },
+  alloys: { current: 0, target: 0 }
+})
 
 // Actions
 const addItem = () => {
@@ -25,20 +27,16 @@ const addItem = () => {
   items.value.push({
     id: crypto.randomUUID(),
     name: newItemName.value,
-    metal: { ...newItemMetal.value },
-    ceramics: { ...newItemCeramics.value },
-    resin: { ...newItemResin.value },
-    chemicals: { ...newItemChemicals.value },
-    alloys: { ...newItemAlloys.value }
+    ...Object.fromEntries(
+      Object.entries(newItem.value).map(([key, val]) => [key, { ...val }])
+    )
   })
 
   // Reset form
   newItemName.value = ''
-  newItemMetal.value = { current: 0, target: 0 }
-  newItemCeramics.value = { current: 0, target: 0 }
-  newItemResin.value = { current: 0, target: 0 }
-  newItemChemicals.value = { current: 0, target: 0 }
-  newItemAlloys.value = { current: 0, target: 0 }
+  Object.keys(newItem.value).forEach(key => {
+    newItem.value[key] = { current: 0, target: 0 }
+  })
 }
 
 const removeItem = (id) => {
@@ -48,51 +46,35 @@ const removeItem = (id) => {
 // Computations
 const analyzedItems = computed(() => {
   return items.value.map(item => {
-    const metalNeeded = Math.max(0, item.metal.target - item.metal.current)
-    const ceramicsNeeded = Math.max(0, item.ceramics.target - item.ceramics.current)
-    const resinNeeded = Math.max(0, item.resin.target - item.resin.current)
-    const chemicalsNeeded = Math.max(0, item.chemicals.target - item.chemicals.current)
-    const alloysNeeded = Math.max(0, item.alloys.target - item.alloys.current)
-
-    return {
-      ...item,
-      metalResult: solve(metalNeeded, metalIncrements),
-      ceramicsResult: solve(ceramicsNeeded, ceramicsIncrements),
-      resinResult: solve(resinNeeded, resinIncrements),
-      chemicalsResult: solve(chemicalsNeeded, chemicalsIncrements),
-      alloysResult: solve(alloysNeeded, alloysIncrements)
-    }
+    const results = {}
+    Object.keys(resourceTypes).forEach(type => {
+      const needed = Math.max(0, item[type].target - item[type].current)
+      results[`${type}Result`] = solve(needed, resourceTypes[type].increments)
+    })
+    return { ...item, ...results }
   })
 })
 
 const totalRequisitionList = computed(() => {
-  const counts = {
-    metal: {},
-    ceramics: {},
-    resin: {},
-    chemicals: {},
-    alloys: {},
-  }
+  const counts = Object.fromEntries(
+    Object.keys(resourceTypes).map(type => [type, {}])
+  )
 
   analyzedItems.value.forEach(item => {
-    item.metalResult.packs.forEach(p => counts.metal[p] = (counts.metal[p] || 0) + 1)
-    item.ceramicsResult.packs.forEach(p => counts.ceramics[p] = (counts.ceramics[p] || 0) + 1)
-    item.resinResult.packs.forEach(p => counts.resin[p] = (counts.resin[p] || 0) + 1)
-    item.chemicalsResult.packs.forEach(p => counts.chemicals[p] = (counts.chemicals[p] || 0) + 1)
-    item.alloysResult.packs.forEach(p => counts.alloys[p] = (counts.alloys[p] || 0) + 1)
+    Object.keys(resourceTypes).forEach(type => {
+      item[`${type}Result`].packs.forEach(p => {
+        counts[type][p] = (counts[type][p] || 0) + 1
+      })
+    })
   })
 
   const formatList = (record) => Object.entries(record)
     .map(([size, count]) => ({ size: Number(size), count }))
     .sort((a, b) => b.size - a.size)
 
-  return {
-    metal: formatList(counts.metal),
-    ceramics: formatList(counts.ceramics),
-    resin: formatList(counts.resin),
-    chemicals: formatList(counts.chemicals),
-    alloys: formatList(counts.alloys),
-  }
+  return Object.fromEntries(
+    Object.keys(resourceTypes).map(type => [type, formatList(counts[type])])
+  )
 })
 
 // Helper to format pack list like "2x 800, 1x 200"
@@ -155,12 +137,12 @@ const formatPacks = (packs) => {
               <div class="space-y-3">
                 <div class="resource-stat-row">
                   <label class="resource-stat-label">Cur</label>
-                  <input v-model.number="newItemMetal.current" type="number" min="0"
+                  <input v-model.number="newItem.metal.current" type="number" min="0"
                     class="resource-stat-input focus:border-blue-500 text-gray-300" />
                 </div>
                 <div class="resource-stat-row">
                   <label class="resource-stat-label">Tgt</label>
-                  <input v-model.number="newItemMetal.target" type="number" min="0"
+                  <input v-model.number="newItem.metal.target" type="number" min="0"
                     class="resource-stat-input focus:border-blue-500 text-blue-100" />
                 </div>
               </div>
@@ -172,12 +154,12 @@ const formatPacks = (packs) => {
               <div class="space-y-3">
                 <div class="resource-stat-row">
                   <label class="resource-stat-label">Cur</label>
-                  <input v-model.number="newItemCeramics.current" type="number" min="0"
+                  <input v-model.number="newItem.ceramics.current" type="number" min="0"
                     class="resource-stat-input focus:border-amber-500 text-gray-300" />
                 </div>
                 <div class="resource-stat-row">
                   <label class="resource-stat-label">Tgt</label>
-                  <input v-model.number="newItemCeramics.target" type="number" min="0"
+                  <input v-model.number="newItem.ceramics.target" type="number" min="0"
                     class="resource-stat-input focus:border-amber-500 text-amber-100" />
                 </div>
               </div>
@@ -189,12 +171,12 @@ const formatPacks = (packs) => {
               <div class="space-y-3">
                 <div class="resource-stat-row">
                   <label class="resource-stat-label">Cur</label>
-                  <input v-model.number="newItemResin.current" type="number" min="0"
+                  <input v-model.number="newItem.resin.current" type="number" min="0"
                     class="resource-stat-input focus:border-emerald-500 text-gray-300" />
                 </div>
                 <div class="resource-stat-row">
                   <label class="resource-stat-label">Tgt</label>
-                  <input v-model.number="newItemResin.target" type="number" min="0"
+                  <input v-model.number="newItem.resin.target" type="number" min="0"
                     class="resource-stat-input focus:border-emerald-500 text-emerald-100" />
                 </div>
               </div>
@@ -206,12 +188,12 @@ const formatPacks = (packs) => {
               <div class="space-y-3">
                 <div class="resource-stat-row">
                   <label class="resource-stat-label">Cur</label>
-                  <input v-model.number="newItemChemicals.current" type="number" min="0"
+                  <input v-model.number="newItem.chemicals.current" type="number" min="0"
                     class="resource-stat-input focus:border-purple-500 text-gray-300" />
                 </div>
                 <div class="resource-stat-row">
                   <label class="resource-stat-label">Tgt</label>
-                  <input v-model.number="newItemChemicals.target" type="number" min="0"
+                  <input v-model.number="newItem.chemicals.target" type="number" min="0"
                     class="resource-stat-input focus:border-purple-500 text-purple-100" />
                 </div>
               </div>
@@ -223,12 +205,12 @@ const formatPacks = (packs) => {
               <div class="space-y-3">
                 <div class="resource-stat-row">
                   <label class="resource-stat-label">Cur</label>
-                  <input v-model.number="newItemAlloys.current" type="number" min="0"
+                  <input v-model.number="newItem.alloys.current" type="number" min="0"
                     class="resource-stat-input focus:border-rose-500 text-gray-300" />
                 </div>
                 <div class="resource-stat-row">
                   <label class="resource-stat-label">Tgt</label>
-                  <input v-model.number="newItemAlloys.target" type="number" min="0"
+                  <input v-model.number="newItem.alloys.target" type="number" min="0"
                     class="resource-stat-input focus:border-rose-500 text-rose-100" />
                 </div>
               </div>
@@ -257,7 +239,7 @@ const formatPacks = (packs) => {
                 {{ item.name }}
               </h3>
               <button @click="removeItem(item.id)" class="btn-cancel">
-                Start Cancellation
+                Cancel Requisition
               </button>
             </div>
 
