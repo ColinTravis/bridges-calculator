@@ -21,6 +21,13 @@ export default function useOptimizer() {
             }
         }
 
+        // Cover any remainder with one smallest pack to avoid shortages
+        if (remaining > 0) {
+            const smallest = increments[increments.length - 1];
+            packs.push(smallest);
+            remaining -= smallest;
+        }
+
         const total = packs.reduce((sum, p) => sum + p, 0);
 
         return {
